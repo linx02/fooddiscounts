@@ -6,6 +6,8 @@ class OfferList:
     def median_savings(self) -> tuple:
         savings = [offer.savings for offer in self.offers if offer.savings]
         percent_savings = [offer.percent_savings for offer in self.offers if offer.percent_savings]
+        if not savings or not percent_savings:
+            return 0, 0
         return sum(savings) / len(savings), sum(percent_savings) / len(percent_savings)
     
     def median_price(self) -> float:
@@ -15,7 +17,7 @@ class OfferList:
     def best_offers(self, n=None) -> list:
         n = n if n else len(self.offers)
         filtered_offers = [offer for offer in self.offers if offer.savings]
-        return sorted(filtered_offers, key=lambda x: x.savings, reverse=True)[:n]
+        return sorted(filtered_offers, key=lambda x: x.savings, reverse=True)[:n] if filtered_offers else self.offers
 
     def __len__(self):
         return len(self.offers)

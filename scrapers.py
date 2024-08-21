@@ -97,4 +97,30 @@ class WillysScraper:
 class LidlScraper:
     def scrape(self) -> OfferList:
         # Scrape the website
-        pass
+        url="https://lidl.se/c/mandag-soendag/a10053163?tabCode=Current_Sales_Week"
+        res = requests.get(url)
+        # Find all occurrences in the text
+        pattern = r'productid="\d+"'
+        matches = re.findall(pattern, res.text)
+        # Extract product ids
+        product_ids = [int(match.split('"')[1]) for match in matches]
+        # Get unique product ids
+        product_ids = list(set(product_ids))
+
+        urls = [f"https://lidl.se/p/api/detail/{id}/SE/sv" for id in product_ids]
+        offer_list = OfferList('Lidl')
+
+        for url in urls:
+            res = requests.get(url).json()
+            image_key = list(res['media']['imageMap'])
+            image_key = image_key[0]
+            offer = Offer(
+                res['keyfacts']['title'],
+                res['price']['price'],
+                res['price']['price'],
+                res['media']['imageMap'][image_key]['largeUrl'],
+                res['stockAvailability']['minOrderableQuantity'],
+            )
+            offer_list.offers.append(offer)
+
+        return offer_list
